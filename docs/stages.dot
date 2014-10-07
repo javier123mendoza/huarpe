@@ -1,0 +1,45 @@
+digraph StagesBuilding {
+    rankdir=lr;
+    compound=true;
+    "developer"      -> "SCM"            [label=" $ scm push"];
+    "SCM"            ->"deploy"          [label=" master | dev | ..."];
+    "agnostict"      ->"deploy"
+    "deploy"         ->"stages building" [label=" dev | test | prod "]
+    "stages building"->"setup";
+    "stages building"->"release";
+    "stages building"->"rollback" ;
+    "setup"          ->"current release";
+    "release"        ->"backup";
+    "release"        ->"current release";
+    "current release"->"migration";
+    "current release"->"web server";
+    "current release"->"Project tasks";
+    "rollback"       ->"backup";
+    "rollback"       ->"migration";
+    subgraph clusterStages {
+        "setup";
+        "release";
+        "rollback";
+    }
+    subgraph clusterInfrastructure {
+        label = "Infrastructure";
+        "web server";
+        "migration";
+    }
+    subgraph clusterLibreries {
+        label="Libreries";
+        "phing";
+        "composer"->"phing";
+    }
+    "composer"->"stages building";
+    "phing"   ->"stages building"
+    subgraph clusterProject {
+        "Project tasks";
+        "Project tasks"->"dependencies";
+        "Project tasks"->"parameters";
+        "Project tasks"->"permissions";
+    }
+    "parameters"     ->"dependencies"
+    "permissions"    ->"dependencies";
+
+}
