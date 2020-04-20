@@ -1,0 +1,218 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "API Gateway MQ Request/Response CISAT",
+        "version": "1.0.0",
+        "description": "Esta API provee una inteface para comunicarse asincronicamente con Colas de Request y Response de Cisat.\nSolamente enviá y recupera un MSG. Sin validar el contenido."
+    },
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/{hostname}/{port}/{channel}/{queue_manager}/{queue}/message": {
+            "post": {
+                "consumes": [
+                    "text/xml",
+                    "application/json"
+                ],
+                "produces": [
+                    "text/xml",
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "description": "Payload para enviar",
+                        "schema": {
+                            "$ref": "#/definitions/message-req"
+                        },
+                        "in": "body",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK mensaje enviado \nen el header indica el Location para recuperar la respuesta."
+                    },
+                    "401": {
+                        "description": "Problemas con las credenciales"
+                    },
+                    "503": {
+                        "description": "Host innalcazable"
+                    }
+                },
+                "summary": "Envio mensaje a queue MQ"
+            },
+            "parameters": [
+                {
+                    "name": "hostname",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "port",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "channel",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "queue_manager",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "queue",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/{hostname}/{port}/{channel}/{queue_manager}/{queue}/message/{id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "$ref": "#/responses/message-response",
+                        "schema": {
+                            "$ref": "#/definitions/message-res"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "id": "some text",
+                                "payload_base64": "some text"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Problemas con credenciales"
+                    },
+                    "404": {
+                        "description": "ID no existe"
+                    },
+                    "102": {
+                        "description": "Pendiente a respuesta"
+                    },
+                    "410": {
+                        "description": "Ya se devolvio la respuesta"
+                    }
+                },
+                "summary": "Recupera respuesta mensaje"
+            },
+            "parameters": [
+                {
+                    "name": "hostname",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "port",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "channel",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "queue_manager",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "queue",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "message-req": {
+            "title": "Root Type for message",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "payload_base64": {
+                    "description": "payload codificado en base64\n",
+                    "type": "string"
+                }
+            },
+            "example": {
+                "payload_base64": "Zm9vIGJhcg=="
+            }
+        },
+        "message-res": {
+            "title": "Root Type for message",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Unique ID",
+                    "type": "string"
+                },
+                "payload_base64": {
+                    "description": "payload codificado en base64\n",
+                    "type": "string"
+                }
+            },
+            "example": {
+                "id": "unique_id",
+                "payload_base64": "Zm9vIGJhcg=="
+            }
+        }
+    },
+    "responses": {
+        "message-response": {
+            "description": "",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "examples": {
+                "application/json": "\"some text\""
+            }
+        }
+    },
+    "securityDefinitions": {
+        "security-mq-connect": {
+            "type": "basic",
+            "description": "Credenciales de MQ"
+        }
+    },
+    "tags": [
+        {
+            "name": "mq",
+            "description": ""
+        },
+        {
+            "name": "cisat",
+            "description": "Middleware CISAT"
+        }
+    ]
+}
